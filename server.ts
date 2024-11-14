@@ -16,7 +16,7 @@ app.get('/', (req: Request, res: Response) => {
   });
 });
 
-console.log(process.env.DATABASE_URL);
+app.use('/api/v1/accounts', accountRouter);
 
 app.listen(3000, () => {
   console.log('listening on port 3000...');

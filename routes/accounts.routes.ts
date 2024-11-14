@@ -3,6 +3,8 @@ import accountController from '../controller/accounts.controller';
 
 const router = express.Router();
 
-router.route('/').get(accountController.getAccount).post(accountController.createAccount);
+router.route('/').post(accountController.createAccount).get(accountController.getAllAccounts);
+
+router.route('/:id').get(accountController.getAccount).patch(accountController.updateBalance).delete(accountController.deleteAccount);
 
 export default router;
