@@ -13,7 +13,7 @@ export const transfers = pgTable(
       .notNull()
       .references(() => accounts.id),
     amount: doublePrecision('amount').notNull(),
-    createdAt: timestamp('created_at').notNull().defaultNow(),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   },
   (table) => {
     return {

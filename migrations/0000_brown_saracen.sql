@@ -1,18 +1,17 @@
+CREATE TYPE "public"."currency_enum" AS ENUM('NRS', 'EURO', 'USD');--> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "accounts" (
 	"id" serial PRIMARY KEY NOT NULL,
 	"full_name" varchar NOT NULL,
-	"balance" varchar NOT NULL,
-	"currency" varchar NOT NULL,
-	"updated_at" timestamp,
-	"created_at" timestamp DEFAULT now() NOT NULL,
-	"deleted_at" timestamp
+	"balance" double precision NOT NULL,
+	"currency" "currency_enum" NOT NULL,
+	"created_at" timestamp with time zone DEFAULT now()
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "entries" (
 	"id" serial PRIMARY KEY NOT NULL,
 	"account_id" integer NOT NULL,
 	"acmount" double precision NOT NULL,
-	"created_at" timestamp NOT NULL
+	"created_at" timestamp with time zone NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "transfers" (
@@ -20,7 +19,7 @@ CREATE TABLE IF NOT EXISTS "transfers" (
 	"from_account_id" integer NOT NULL,
 	"to_account_id" integer NOT NULL,
 	"amount" double precision NOT NULL,
-	"created_at" timestamp DEFAULT now() NOT NULL
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
 DO $$ BEGIN
