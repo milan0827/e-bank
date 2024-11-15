@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from 'express';
 import { db } from '../db/drizzle';
-import { accounts } from '../db/schema';
+import { accounts, AccountType } from '../db/schema';
 import { eq } from 'drizzle-orm';
 import { catchAsynncFunc } from '../helpers/catchAysynFunc';
 import CustomError from '../helpers/customError';
@@ -42,7 +42,7 @@ const getAllAccounts = catchAsynncFunc(async (req: Request, res: Response, next:
 });
 
 const createAccount = catchAsynncFunc(async (req: Request, res: Response) => {
-  const { fullName, balance, currency } = req.body;
+  const { fullName, balance, currency }: AccountType = req.body;
 
   if (!fullName || typeof fullName !== 'string' || fullName.trim().length === 0) {
     return res.status(400).json({
@@ -51,7 +51,7 @@ const createAccount = catchAsynncFunc(async (req: Request, res: Response) => {
     });
   }
 
-  if (!Object.values(currencyEnum).includes(currency)) {
+  if (!Object.values(currencyEnum).includes(currency as currencyEnum)) {
     return res.status(400).json({
       status: 'fail',
       message: 'Currency',

@@ -23,4 +23,5 @@ export const transfers = pgTable(
   },
 );
 
+export type TransferType = typeof transfers.$inferSelect;
 sql`COMMENT ON COLUMN ${transfers.amount} IS "Can not be negative"`;
