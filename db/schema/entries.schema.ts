@@ -10,7 +10,7 @@ export const entries = pgTable(
       .notNull()
       .references(() => accounts.id),
     amount: doublePrecision('acmount').notNull(),
-    createdAt: timestamp('created_at', { withTimezone: true }).notNull(),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   },
   (table) => {
     return {
