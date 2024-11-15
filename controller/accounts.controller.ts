@@ -1,7 +1,9 @@
-import { Request, Response } from 'express';
+import { NextFunction, Request, Response } from 'express';
 import { db } from '../db/drizzle';
 import { accounts } from '../db/schema';
 import { eq } from 'drizzle-orm';
+import { catchAsynncFunc } from '../helpers/catchAysynFunc';
+import CustomError from '../helpers/customError';
 
 enum currencyEnum {
   NRS = 'NRS',
@@ -9,57 +11,37 @@ enum currencyEnum {
   EURO = 'EURO',
 }
 
-const getAccount = async (req: Request, res: Response) => {
+const getAccount = catchAsynncFunc(async (req: Request, res: Response, next: NextFunction) => {
   const { id } = req.params;
-  console.log('Id', id);
-  try {
-    const result = await db
-      .select()
-      .from(accounts)
-      .where(eq(accounts.id, Number(id)))
-      .limit(1);
 
-    if (result.length === 0) {
-      throw new Error('Account with that id could not be found');
-    }
+  const accountExists = await db.select().from(accounts).where(eq(accounts.id, +id)).limit(1);
 
-    res.status(200).json({
-      status: 'success',
-      message: 'User found',
-      account: { ...result[0] },
-    });
-  } catch (error) {
-    const err = error as Error;
-    res.status(400).json({
-      status: 'fail',
-      message: err.message,
-    });
+  if (accountExists.length === 0) {
+    return next(new CustomError('Account with that id does not exists', 400));
   }
-};
 
-const getAllAccounts = async (req: Request, res: Response) => {
-  try {
-    const result = await db.select().from(accounts).limit(5).offset(1).orderBy(accounts.id);
+  res.status(200).json({
+    status: 'success',
+    message: 'Account found',
+    data: { ...accountExists[0] },
+  });
+});
 
-    if (!result) {
-      throw new Error('No accounts found');
-    }
+const getAllAccounts = catchAsynncFunc(async (req: Request, res: Response, next: NextFunction) => {
+  const result = await db.select().from(accounts).limit(5).orderBy(accounts.id);
 
-    res.status(200).json({
-      status: 'success',
-      message: 'Accounts found',
-      accounts: result,
-    });
-  } catch (error) {
-    const err = error as Error;
-    res.status(204).json({
-      status: 'fail',
-      message: err.message,
-    });
+  if (!result) {
+    return next(new CustomError('No account found', 200));
   }
-};
 
-const createAccount = async (req: Request, res: Response) => {
+  res.status(200).json({
+    status: 'success',
+    message: 'Accounts found',
+    data: result,
+  });
+});
+
+const createAccount = catchAsynncFunc(async (req: Request, res: Response) => {
   const { fullName, balance, currency } = req.body;
 
   if (!fullName || typeof fullName !== 'string' || fullName.trim().length === 0) {
@@ -76,96 +58,63 @@ const createAccount = async (req: Request, res: Response) => {
     });
   }
 
-  try {
-    console.log(req.body);
-    const result = await db.insert(accounts).values({
+  const result = await db
+    .insert(accounts)
+    .values({
       balance,
       fullName,
       currency,
-    });
+    })
+    .returning();
 
-    res.status(200).json({
-      status: 'success',
-      account: result,
-    });
-  } catch (error) {
-    const err = error as Error;
-    console.log('err', err);
-    res.status(404).json({
-      status: 'fail',
-      error: err.message,
-    });
-  }
-};
+  console.log('result', result);
 
-const updateBalance = async (req: Request, res: Response) => {
+  res.status(200).json({
+    status: 'success',
+    data: { ...result },
+  });
+});
+
+const updateBalance = catchAsynncFunc(async (req: Request, res: Response, next: NextFunction) => {
   const { id } = req.params;
-  try {
-    const accountExists = await db
-      .select()
-      .from(accounts)
-      .where(eq(accounts.id, Number(id)))
-      .limit(1);
+  const accountExists = await db.select().from(accounts).where(eq(accounts.id, +id)).limit(1);
 
-    console.log('Account exists', accountExists);
-    if (accountExists.length === 0) {
-      throw new Error('Account with that id does not exists');
-    }
-
-    const updatedBalanceInfo = await db
-      .update(accounts)
-      .set({ balance: req.body.balance })
-      .where(eq(accounts.id, Number(id)))
-      .returning({
-        balance: accounts.balance,
-      });
-
-    console.log('Updated', updatedBalanceInfo);
-
-    res.status(200).json({
-      status: 'success',
-      message: 'Balance updated successfully',
-      account: { ...updatedBalanceInfo[0] },
-    });
-  } catch (error) {
-    const err = error as Error;
-    res.status(400).json({
-      status: 'fail',
-      message: err.message,
-    });
+  if (accountExists.length === 0) {
+    return next(new CustomError('Account with that id does not exists', 400));
   }
-};
 
-const deleteAccount = async (req: Request, res: Response) => {
+  if (!req.body.balance) {
+    return next(new CustomError('The balance field can not be field', 400));
+  }
+
+  const updatedBalanceInfo = await db.update(accounts).set({ balance: req.body.balance }).where(eq(accounts.id, +id)).returning({
+    balance: accounts.balance,
+  });
+
+  console.log('Updated', updatedBalanceInfo);
+
+  res.status(200).json({
+    status: 'success',
+    message: 'Balance updated successfully',
+    data: { ...updatedBalanceInfo[0] },
+  });
+});
+
+const deleteAccount = catchAsynncFunc(async (req: Request, res: Response, next: NextFunction) => {
   const { id } = req.params;
-  try {
-    const accountExists = await db
-      .select()
-      .from(accounts)
-      .where(eq(accounts.id, Number(id)))
-      .limit(1);
+  const accountExists = await db.select().from(accounts).where(eq(accounts.id, +id)).limit(1);
 
-    if (accountExists.length === 0) {
-      throw new Error('Account with that id does not exists');
-    }
-
-    await db
-      .delete(accounts)
-      .where(eq(accounts.id, Number(id)))
-      .returning();
-
-    res.status(200).json({
-      status: 'success',
-      message: 'Account deleted successfully',
-      accounts: null,
-    });
-  } catch (error) {
-    const err = error as Error;
-    res.status(400).json({
-      status: 'fail',
-      message: err.message,
-    });
+  if (accountExists.length === 0) {
+    return next(new CustomError('Account with that id does not exists', 400));
   }
-};
+
+  await db.delete(accounts).where(eq(accounts.id, +id)).returning();
+
+  res.status(200).json({
+    status: 'success',
+    message: 'Account deleted successfully',
+    data: null,
+  });
+});
 
 export default { getAccount, createAccount, getAllAccounts, updateBalance, deleteAccount };

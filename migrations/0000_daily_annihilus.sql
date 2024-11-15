@@ -11,7 +11,7 @@ CREATE TABLE IF NOT EXISTS "entries" (
 	"id" serial PRIMARY KEY NOT NULL,
 	"account_id" integer NOT NULL,
 	"acmount" double precision NOT NULL,
-	"created_at" timestamp with time zone NOT NULL
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "transfers" (
