@@ -21,8 +21,6 @@ jobs:
     steps:
       - name: Check out repository code
         uses: actions/checkout@v4
-      - name: typescript action
-        uses: actions/typescript-action@v1
       - name: setup node js
         uses: actions/setup-node@v4
         with:
@@ -30,9 +28,5 @@ jobs:
           cache: 'npm'
       - name: Clean install
         run: npm ci
-      - name: Connect to postgresql
-        run: npm run dev
-      # - name: Build project
-      #   run: npm run build --if-present
-      # - name: Test project
-      #   run: npm run build
+      - name: Build project
+        run: npm run build --if-present
