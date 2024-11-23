@@ -13,10 +13,10 @@ jobs:
 
     strategy:
       matrix:
-        node-version: ['21.x', '22.x', '23.x']
+        node-version: ['22.x']
 
     env:
-      POSTGRES_HOST: postgresql://neondb_owner:Nc6zS0IoLMlK@ep-late-king-a1rrmzzs.ap-southeast-1.aws.neon.tech/neondb?sslmode=require
+      POSTGRES_HOST: ${{secrets.DB_HOST}}
 
     steps:
       - name: Check out repository code
