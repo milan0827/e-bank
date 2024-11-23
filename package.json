@@ -2,10 +2,12 @@
   "name": "bank_mgmt",
   "version": "1.0.0",
   "main": "index.js",
+  "type": "module",
   "scripts": {
     "dev": "nodemon server.ts",
     "start": "node build/index.js",
     "build": "tsc",
+    "test": "npx mocha server.ts",
     "lint": "eslint .",
     "format": "prettier . --write",
     "migration:gen": "drizzle-kit generate",
@@ -24,6 +26,7 @@
   },
   "devDependencies": {
     "@types/express": "^4.17.21",
+    "@types/mocha": "^10.0.10",
     "@types/pg": "^8.11.10",
     "@typescript-eslint/eslint-plugin": "^8.14.0",
     "@typescript-eslint/parser": "^8.14.0",
