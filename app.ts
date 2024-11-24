@@ -1,9 +1,8 @@
-import express, { NextFunction, Request, Response } from 'express';
 import dotenv from 'dotenv';
+import express, { NextFunction, Request, Response } from 'express';
+import { globalErrorHandling } from './controller/errors.controller';
 import accountRouter from './routes/accounts.routes';
 import entriesRouter from './routes/entries.routes';
-import { CustomErrorType } from './types/customErrorType';
-import { globalErrorHandling } from './controller/errors.controller';
 
 const app = express();
 app.use(express.json());
@@ -13,11 +12,11 @@ dotenv.config();
 //   req.requestTime = new Date().toISOString();
 // });
 
-app.get('/', (req: Request, res: Response) => {
-  return res.send({
-    data: 'hello world',
-  });
-});
+// app.get('/', (req: Request, res: Response) => {
+//   return res.send({
+//     data: 'hello world',
+//   });
+// });
 
 app.use('/api/v1/accounts', accountRouter);
 app.use('/api/v1/entries', entriesRouter);
