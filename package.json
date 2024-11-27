@@ -6,7 +6,7 @@
     "dev": "nodemon server.ts",
     "start": "ts-node build/index.js",
     "build": "tsc",
-    "test": "jest",
+    "test": "jest --watch-all --verbose --coverage",
     "lint": "eslint .",
     "format": "prettier . --write",
     "migration:gen": "drizzle-kit generate",
