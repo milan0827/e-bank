@@ -26,10 +26,6 @@ export const transferTX = async (arg: CreateTransferParams): Promise<TransferTxR
   await db.transaction(async (tsx) => {
     const fromAccountBalance = await tsx.select({ balance: accounts.balance }).from(accounts).where(eq(accounts.id, arg.fromAccountId)).limit(1);
 
-    if (!fromAccountBalance || fromAccountBalance[0].balance < arg.amount || fromAccountBalance[0].balance < 100) {
-      console.log('Insufficient balance');
-    }
-
     // First create transfer by inserting into transfers table
     tranxResult.transfer = await tsx
       .insert(transfers)

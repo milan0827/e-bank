@@ -1,11 +1,12 @@
 import { NextFunction, Request, Response } from 'express';
 import { db } from '../db/drizzle';
-import { accounts, entries, transfers } from '../db/schema';
+import { accounts, currencyEnum, entries, transfers } from '../db/schema';
 import { catchAsynncFunc } from '../helpers/catchAysynFunc';
 import CustomError from '../helpers/customError';
 import { eq } from 'drizzle-orm';
 import { transferTX } from './transaction.contoller';
 import { CreateTransferParams } from '../types/transfers';
+import accountsController from './accounts.controller';
 
 const getTransfer = catchAsynncFunc(async (req: Request, res: Response, next: NextFunction) => {
   const { id } = req.params;
@@ -29,19 +30,31 @@ const getTransfer = catchAsynncFunc(async (req: Request, res: Response, next: Ne
 const createTransfer = catchAsynncFunc(async (req: Request, res: Response, next: NextFunction) => {
   const { fromAccountId, toAccountId, amount, currency }: CreateTransferParams = req.body;
 
-  if (!fromAccountId || !toAccountId || !amount) {
-    next(new CustomError('All fields are required', 400));
+  if (fromAccountId <= 0 || toAccountId <= 0 || !amount) {
+    return next(new CustomError('All fields are required', 400));
   }
 
-  if (!validAccountCurrency(currency, fromAccountId)) {
-    next(new CustomError('account currency mismatch', 400));
-  }
-  if (!validAccountCurrency(currency, toAccountId)) {
-    next(new CustomError('account currency mismatch', 400));
+  if (toAccountId === fromAccountId) {
+    return next(new CustomError('Can not transfer to own account', 400));
   }
 
-  const result = await transferTX({ amount: +amount, toAccountId, fromAccountId } as CreateTransferParams);
-  if (!result) next(new CustomError('Internal server error', 500));
+  const account = await db.select().from(accounts).where(eq(accounts.id, fromAccountId));
+
+  if (amount < 100 || account[0].balance < amount) {
+    return next(new CustomError('Insufficient balance', 400));
+  }
+
+  if (!fromAccountId || !toAccountId) {
+    return next(new CustomError('Missing accounts', 400));
+  }
+
+  if ((await validAccountCurrency(currency, toAccountId)) === false || (await validAccountCurrency(currency, fromAccountId)) === false) {
+    return next(new CustomError('account currency mismatch', 400));
+  }
+
+  const result = await transferTX({ amount: Number(amount), toAccountId, fromAccountId } as CreateTransferParams);
+
+  if (!result) return next(new CustomError('Internal server error', 500));
 
   res.status(200).json({
     status: 'success',

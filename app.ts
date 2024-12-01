@@ -4,6 +4,7 @@ import { globalErrorHandling } from './controller/errors.controller';
 import accountRouter from './routes/accounts.routes';
 import entriesRouter from './routes/entries.routes';
 import transferRouter from './routes/transfers.routes';
+import { CustomErrorType } from './types/customErrorType';
 
 const app = express();
 app.use(express.json());
@@ -32,6 +33,8 @@ app.all('*', (req: Request, res: Response, next: NextFunction) => {
   );
 });
 
-app.use(globalErrorHandling);
+app.use((err: CustomErrorType, req: Request, res: Response, next: NextFunction) => {
+  globalErrorHandling(err, req, res);
+});
 
 export default app;
