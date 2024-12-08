@@ -1,4 +1,4 @@
-import { sql } from 'drizzle-orm';
+oimport { sql } from 'drizzle-orm';
 import { doublePrecision, index, integer, pgTable, serial, timestamp } from 'drizzle-orm/pg-core';
 import { accounts } from './accounts.schema';
 
