@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { CustomErrorType } from '../types/customErrorType';
+import { CustomErrorType } from '../../types/customErrorType';
 
 export const globalErrorHandling = (err: CustomErrorType, req: Request, res: Response) => {
   console.log('error error error error', err);

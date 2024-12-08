@@ -1,29 +1,29 @@
 import { NextFunction, Request, Response } from 'express';
-import { db } from '../db/drizzle';
-import { accounts, currencyEnum, entries, transfers } from '../db/schema';
-import { catchAsynncFunc } from '../helpers/catchAysynFunc';
-import CustomError from '../helpers/customError';
+import { db } from '../../db/drizzle';
+import { accounts, currencyEnum, entries, transfers } from '../../db/schema';
+import { catchAsynncFunc } from '../../helpers/catchAysynFunc';
+import CustomError from '../../helpers/customError';
 import { eq } from 'drizzle-orm';
 import { transferTX } from './transaction.contoller';
-import { CreateTransferParams } from '../types/transfers';
-import accountsController from './accounts.controller';
+import { CreateTransferParams } from '../../types/transfers';
+import accountsController from '../accounts/accounts.controller';
 
 const getTransfer = catchAsynncFunc(async (req: Request, res: Response, next: NextFunction) => {
   const { id } = req.params;
-  const result = await db
+  const transfer = await db
     .select()
     .from(transfers)
     .where(eq(transfers.id, Number(id)))
-    .orderBy(entries.createdAt);
+    .orderBy(transfers.createdAt);
 
-  if (!result) {
+  if (!transfer || transfer.length === 0) {
     return next(new CustomError('No transfer records', 200));
   }
 
   res.status(200).json({
     status: 'success',
-    message: 'Transfer records found',
-    data: { ...result },
+    message: 'Transfer record found',
+    transfer: transfer[0],
   });
 });
 
@@ -52,14 +52,14 @@ const createTransfer = catchAsynncFunc(async (req: Request, res: Response, next:
     return next(new CustomError('account currency mismatch', 400));
   }
 
-  const result = await transferTX({ amount: Number(amount), toAccountId, fromAccountId } as CreateTransferParams);
+  const transfer = await transferTX({ amount: Number(amount), toAccountId, fromAccountId } as CreateTransferParams);
 
-  if (!result) return next(new CustomError('Internal server error', 500));
+  if (!transfer) return next(new CustomError('Internal server error', 500));
 
   res.status(200).json({
     status: 'success',
     message: 'Transaction done successfully',
-    data: result,
+    transfers: transfer,
   });
 });
 

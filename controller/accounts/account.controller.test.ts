@@ -1,8 +1,8 @@
 import request from 'supertest';
-import app from '../app';
+import app from '../../app';
 import accountsController from './accounts.controller';
 import { NextFunction, Request, Response } from 'express';
-import { db } from '../db/drizzle';
+import { db } from '../../db/drizzle';
 
 // test('Returns the list of account', async () => {
 //   const res = await request(app).get('/api/v1/accounts');

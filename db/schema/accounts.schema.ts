@@ -1,4 +1,6 @@
-import { doublePrecision, index, pgEnum, pgTable, serial, timestamp, varchar } from 'drizzle-orm/pg-core';
+import { doublePrecision, index, pgEnum, pgTable, serial, timestamp, unique, varchar } from 'drizzle-orm/pg-core';
+import { users } from './users.schema';
+import { uniqueIndex } from 'drizzle-orm/mysql-core';
 
 export const currencyEnum = pgEnum('currency_enum', ['NRS', 'EURO', 'USD']);
 
@@ -6,14 +8,17 @@ export const accounts = pgTable(
   'accounts',
   {
     id: serial('id').primaryKey(),
-    fullName: varchar('full_name').notNull(),
+    owner: varchar('owner')
+      .notNull()
+      .references(() => users.username),
     balance: doublePrecision('balance').notNull(),
     currency: currencyEnum('currency').notNull(),
     createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
   },
   (table) => {
     return {
-      fullNameIdx: index('full_name_idx').on(table.fullName),
+      ownerIdx: index('owner_idx').on(table.owner),
+      ownerCurrencyKey: unique('owner_currency_key').on(table.owner, table.currency),
     };
   },
 );

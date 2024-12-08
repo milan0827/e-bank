@@ -5,8 +5,15 @@
     {
       "idx": 0,
       "version": "7",
-      "when": 1731686073612,
-      "tag": "0000_daily_annihilus",
+      "when": 1733666478585,
+      "tag": "0000_faulty_slyde",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1733672645596,
+      "tag": "0001_petite_sentry",
       "breakpoints": true
     }
   ]

@@ -1,7 +1,7 @@
 import { eq, sql } from 'drizzle-orm';
-import { db } from '../db/drizzle';
-import { accounts, AccountType, entries, EntryType, transfers, TransferType } from '../db/schema';
-import { CreateTransferParams } from '../types/transfers';
+import { db } from '../../db/drizzle';
+import { accounts, AccountType, entries, EntryType, transfers, TransferType } from '../../db/schema';
+import { CreateTransferParams } from '../../types/transfers';
 
 interface TransferTxResult {
   transfer: TransferType[];

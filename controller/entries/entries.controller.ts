@@ -1,26 +1,26 @@
 import { NextFunction, Request, Response } from 'express';
-import { catchAsynncFunc } from '../helpers/catchAysynFunc';
-import { db } from '../db/drizzle';
-import { entries } from '../db/schema';
+import { catchAsynncFunc } from '../../helpers/catchAysynFunc';
+import { db } from '../../db/drizzle';
+import { entries } from '../../db/schema';
 import { eq } from 'drizzle-orm';
-import CustomError from '../helpers/customError';
+import CustomError from '../../helpers/customError';
 
 const getEntry = catchAsynncFunc(async (req: Request, res: Response, next: NextFunction) => {
-  const { id } = req.body;
-
-  const entry = db
+  const { id } = req.params;
+  const entry = await db
     .select()
     .from(entries)
-    .where(eq(entries.id, Number(id)));
+    .where(eq(entries.id, Number(id)))
+    .limit(1);
 
-  if (!entry) {
-    return next(new CustomError('Entry with that id could not be found', 200));
+  if (!entry || entry.length === 0) {
+    return next(new CustomError('Entry with that id could not be found', 400));
   }
 
   res.status(200).json({
     status: 'success',
     message: 'Entry found',
-    entry: { ...entry },
+    entry: entry[0],
   });
 });
 

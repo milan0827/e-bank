@@ -1,5 +1,5 @@
 import express from 'express';
-import transferController from './../controller/transfers.controller';
+import transferController from '../controller/transfers/transfers.controller';
 
 const router = express.Router();
 
