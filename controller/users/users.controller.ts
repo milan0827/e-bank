@@ -4,22 +4,27 @@ import { db } from '../../db/drizzle';
 import { accounts, users } from '../../db/schema';
 import CustomError from '../../helpers/customError';
 import { eq } from 'drizzle-orm';
+import { hashedPassword } from '../auth/password';
 
 const createUser = catchAsynncFunc(async (req: Request, res: Response, next: NextFunction) => {
   const { username, fullName, password, email } = req.body;
 
   if (!username || !fullName || !password || !email) return next(new CustomError('all fields are required', 404));
 
+  console.log(req.body);
+
   if (username !== username.toLowerCase()) {
     return next(new CustomError('username must be in lowercase', 400));
   }
+
+  const hashPassword = await hashedPassword(password);
 
   const user = await db
     .insert(users)
     .values({
       email,
       fullName,
-      password,
+      password: hashPassword,
       username,
     })
     .returning();

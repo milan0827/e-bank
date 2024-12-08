@@ -6,6 +6,8 @@ import entriesRouter from './routes/entries.routes';
 import transferRouter from './routes/transfers.routes';
 import { CustomErrorType } from './types/customErrorType';
 import usersRouter from './routes/users.routes';
+import bcrypt from 'bcrypt';
+import { trimmer } from './middleware/trimmer';
 
 const app = express();
 app.use(express.json());
@@ -20,6 +22,8 @@ dotenv.config();
 //     data: 'hello world',
 //   });
 // });
+
+app.use(trimmer);
 
 app.use('/api/v1/accounts', accountRouter);
 app.use('/api/v1/entries', entriesRouter);
