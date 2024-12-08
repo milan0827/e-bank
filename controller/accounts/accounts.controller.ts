@@ -1,9 +1,9 @@
 import { NextFunction, Request, Response } from 'express';
-import { db } from '../db/drizzle';
-import { accounts, AccountType } from '../db/schema';
+import { db } from '../../db/drizzle';
+import { accounts, AccountType } from '../../db/schema';
 import { eq } from 'drizzle-orm';
-import { catchAsynncFunc } from '../helpers/catchAysynFunc';
-import CustomError from '../helpers/customError';
+import { catchAsynncFunc } from '../../helpers/catchAysynFunc';
+import CustomError from '../../helpers/customError';
 
 enum currencyEnum {
   NRS = 'NRS',
@@ -16,35 +16,35 @@ const getAccount = catchAsynncFunc(async (req: Request, res: Response, next: Nex
 
   const accountExists = await db.select().from(accounts).where(eq(accounts.id, +id)).limit(1);
 
-  if (accountExists.length === 0) {
+  if (!accountExists || accountExists.length === 0) {
     return next(new CustomError('Account with that id does not exists', 400));
   }
 
   res.status(200).json({
     status: 'success',
     message: 'Account found',
-    data: { ...accountExists[0] },
+    account: accountExists[0],
   });
 });
 
 const getAllAccounts = catchAsynncFunc(async (req: Request, res: Response, next: NextFunction) => {
-  const result = await db.select().from(accounts).limit(5).orderBy(accounts.id);
+  const allAccounts = await db.select().from(accounts).limit(5).orderBy(accounts.id);
 
-  if (!result) {
+  if (!allAccounts) {
     return next(new CustomError('No account found', 200));
   }
 
   res.status(200).json({
     status: 'success',
     message: 'Accounts found',
-    data: result,
+    accounts: allAccounts,
   });
 });
 
 const createAccount = catchAsynncFunc(async (req: Request, res: Response) => {
-  const { fullName, balance, currency }: AccountType = req.body;
+  const { owner, balance, currency }: AccountType = req.body;
 
-  if (!fullName || typeof fullName !== 'string' || fullName.trim().length === 0) {
+  if (!owner || typeof owner !== 'string' || owner.trim().length === 0) {
     return res.status(400).json({
       status: 'fail',
       message: 'Full name is required',
@@ -58,20 +58,20 @@ const createAccount = catchAsynncFunc(async (req: Request, res: Response) => {
     });
   }
 
-  const result = await db
+  const account = await db
     .insert(accounts)
     .values({
       balance,
-      fullName,
+      owner,
       currency,
     })
     .returning();
 
-  console.log('result', result);
+  console.log('result', account);
 
   res.status(200).json({
     status: 'success',
-    data: { ...result },
+    data: account[0],
   });
 });
 
@@ -96,7 +96,7 @@ const updateBalance = catchAsynncFunc(async (req: Request, res: Response, next: 
   res.status(200).json({
     status: 'success',
     message: 'Balance updated successfully',
-    data: { ...updatedBalanceInfo[0] },
+    data: updatedBalanceInfo[0],
   });
 });
 

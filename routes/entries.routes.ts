@@ -1,5 +1,5 @@
 import express from 'express';
-import entriesController from '../controller/entries.controller';
+import entriesController from '../controller/entries/entries.controller';
 
 const router = express.Router();
 

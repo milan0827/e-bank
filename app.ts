@@ -1,10 +1,11 @@
 import dotenv from 'dotenv';
 import express, { NextFunction, Request, Response } from 'express';
-import { globalErrorHandling } from './controller/errors.controller';
+import { globalErrorHandling } from './controller/errors/errors.controller';
 import accountRouter from './routes/accounts.routes';
 import entriesRouter from './routes/entries.routes';
 import transferRouter from './routes/transfers.routes';
 import { CustomErrorType } from './types/customErrorType';
+import usersRouter from './routes/users.routes';
 
 const app = express();
 app.use(express.json());
@@ -23,7 +24,7 @@ dotenv.config();
 app.use('/api/v1/accounts', accountRouter);
 app.use('/api/v1/entries', entriesRouter);
 app.use('/api/v1/transfers', transferRouter);
-
+app.use('/api/v1/users', usersRouter);
 app.all('*', (req: Request, res: Response, next: NextFunction) => {
   next(
     res.status(404).json({
