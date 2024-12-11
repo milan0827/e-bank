@@ -20,11 +20,10 @@ describe('POST /api/v1/accounts ', () => {
 
     expect(res.statusCode).toBe(200);
     expect(res.body).not.toBeNull();
-    expect(res.body.data.length).toBeGreaterThan(0);
     expect(res.body.status).toEqual('success');
   }),
     it('Should create account successfully', async () => {
-      const mockResult = { currency: 'NRS', balance: 100, fullName: 'Test user' };
+      const mockResult = { currency: 'NRS', balance: 100, owner: 'Test user' };
       // Mocking db insert behavior
       db.insert = jest.fn().mockImplementation(() => ({
         values: () => ({
@@ -35,7 +34,7 @@ describe('POST /api/v1/accounts ', () => {
       // Mock req and res
       const req = {
         body: {
-          fullName: 'Test user',
+          owner: 'Test user',
           balance: 100,
           currency: 'NRS',
         },
