@@ -4,20 +4,9 @@ import accountsController from './accounts.controller';
 import { NextFunction, Request, Response } from 'express';
 import { db } from '../../db/drizzle';
 
-// test('Returns the list of account', async () => {
-//   const res = await request(app).get('/api/v1/accounts');
-//   console.log('res', res.body);
-//   expect(res.status).toBe(200);
-// expect(res.body).not.toBeNull();
-// expect(res.body.data.length).toBeGreaterThan(0);
-// expect(res.body.status).toEqual('success');
-// });
-
 describe('POST /api/v1/accounts ', () => {
   it('Shoud return the list of account', async () => {
     const res = await request(app).get('/api/v1/accounts');
-    console.log(res.body, 'Res');
-
     expect(res.statusCode).toBe(200);
     expect(res.body).not.toBeNull();
     expect(res.body.status).toEqual('success');
