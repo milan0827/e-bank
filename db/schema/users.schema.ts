@@ -8,3 +8,5 @@ export const users = pgTable('users', {
   email: varchar('email').notNull().unique(),
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
 });
+
+export type UserType = typeof users.$inferInsert;
