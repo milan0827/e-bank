@@ -4,12 +4,12 @@ import CustomError from '../helpers/customError';
 
 const JWT_SECRET_KEY_LENGTH = 32;
 
-export function createToken(username: string) {
+export function createToken(username: string): string {
   if (process.env.JWT_SECRET_KEY!.length < JWT_SECRET_KEY_LENGTH) {
     throw new Error('secret key length must be of 32 characters');
   }
 
-  jwt.sign({ username }, process.env.JWT_SECRET_KEY!, {
+  return jwt.sign({ username }, process.env.JWT_SECRET_KEY!, {
     expiresIn: '1h',
   });
 }
