@@ -1,6 +1,7 @@
 import { NextFunction, Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
 import CustomError from '../helpers/customError';
+import { AuthPayload } from '../types/auth';
 
 const JWT_SECRET_KEY_LENGTH = 32;
 
