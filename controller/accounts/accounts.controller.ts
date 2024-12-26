@@ -28,21 +28,22 @@ const getAccount = catchAsynncFunc(async (req: Request, res: Response, next: Nex
 
   res.status(200).json({
     status: 'success',
-    message: 'Account found',
+    message: 'account found',
     account: accountExists[0],
   });
 });
 
 const getAllAccounts = catchAsynncFunc(async (req: Request, res: Response, next: NextFunction) => {
+  //TODO: Only andmin can get all accounts
   const allAccounts = await db.select().from(accounts).where(eq(accounts.owner, req.body.username)).limit(5).orderBy(accounts.id);
 
-  if (!allAccounts) {
+  if (!allAccounts || allAccounts.length === 0) {
     return next(new CustomError('accounts not found', 200));
   }
 
   res.status(200).json({
     status: 'success',
-    message: 'Accounts found',
+    message: 'accounts found',
     accounts: allAccounts,
   });
 });
@@ -53,7 +54,7 @@ const createAccount = catchAsynncFunc(async (req: Request, res: Response, next: 
   if (!owner || typeof owner !== 'string' || owner.trim().length === 0) {
     return res.status(400).json({
       status: 'fail',
-      message: 'full name is required',
+      message: 'provide a valid owner name',
     });
   }
 
@@ -77,8 +78,6 @@ const createAccount = catchAsynncFunc(async (req: Request, res: Response, next: 
     })
     .returning();
 
-  console.log('result', account);
-
   res.status(200).json({
     status: 'success',
     data: account[0],
@@ -94,22 +93,20 @@ const updateBalance = catchAsynncFunc(async (req: Request, res: Response, next: 
   }
 
   if (accountExists.length === 0) {
-    return next(new CustomError('account with that id does not exists', 400));
+    return next(new CustomError('account not found', 400));
   }
 
   if (!req.body.balance) {
-    return next(new CustomError('the balance field can not be field', 400));
+    return next(new CustomError('the balance field can not be empty', 400));
   }
 
   const updatedBalanceInfo = await db.update(accounts).set({ balance: req.body.balance }).where(eq(accounts.id, +id)).returning({
     balance: accounts.balance,
   });
 
-  console.log('Updated', updatedBalanceInfo);
-
   res.status(200).json({
     status: 'success',
-    message: 'Balance updated successfully',
+    message: 'balance updated successfully',
     data: updatedBalanceInfo[0],
   });
 });
