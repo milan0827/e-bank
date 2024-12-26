@@ -5,7 +5,7 @@ import { NextFunction, Request, Response } from 'express';
 import { db } from '../../db/drizzle';
 
 describe('POST /api/v1/accounts ', () => {
-  it('Shoud return the list of account', async () => {
+  it('Should return the list of account', async () => {
     const res = await request(app).get('/api/v1/accounts');
     expect(res.statusCode).toBe(200);
     expect(res.body).not.toBeNull();

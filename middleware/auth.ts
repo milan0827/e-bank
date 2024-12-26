@@ -2,6 +2,7 @@ import { NextFunction, Request, Response } from 'express';
 import CustomError from '../helpers/customError';
 import { verifyToken } from '../token/jwt_token';
 import jwt from 'jsonwebtoken';
+import { accounts, users } from '../db/schema';
 
 export default function authMiddleware(req: Request, res: Response, next: NextFunction) {
   const bearerToken = req.headers['authorization']?.split(' ');
@@ -15,5 +16,11 @@ export default function authMiddleware(req: Request, res: Response, next: NextFu
 
   const decodedToken = jwt.verify(token, process.env.JWT_SECRET_KEY!) as { username: string };
   req.body.username = decodedToken.username;
+
+  console.log('accounts', accounts.owner);
+  // if (accounts.owner !== req.body.username) {
+  //   return next(new CustomError('not authorized', 401));
+  // }
+
   next();
 }
