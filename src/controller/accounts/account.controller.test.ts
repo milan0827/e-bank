@@ -1,5 +1,5 @@
 import request from 'supertest';
-import app from '../../app';
+import app from '../../../app';
 import accountsController from './accounts.controller';
 import { NextFunction, Request, Response } from 'express';
 import { db } from '../../db/drizzle';
