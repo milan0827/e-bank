@@ -1,12 +1,42 @@
 import { NextFunction, Request, Response } from 'express';
 import { db } from '../../db/drizzle';
-import { accounts, currencyEnum, entries, transfers } from '../../db/schema';
+import { accounts, currencyEnum, entries, transfers, users } from '../../db/schema';
 import { catchAsynncFunc } from '../../helpers/catchAysynFunc';
 import CustomError from '../../helpers/customError';
 import { eq } from 'drizzle-orm';
 import { transferTX } from './transaction.contoller';
 import { CreateTransferParams } from '../../types/transfers';
 import accountsController from '../accounts/accounts.controller';
+
+// TODO: getOneUserTranser
+
+const getOneAccountTransfers = catchAsynncFunc(async (req: Request, res: Response, next: NextFunction) => {
+  const { accountId } = req.params;
+  if (!accountId || +accountId <= 0) {
+    return next(new CustomError('provide a valid username', 400));
+  }
+  const transferResult = await db
+    .select({
+      id: transfers.id,
+      fromAccountId: transfers.fromAccountId,
+      toAccountId: transfers.toAccountId,
+      amount: transfers.amount,
+      createdAt: transfers.createdAt,
+    })
+    .from(transfers)
+    .innerJoin(accounts, eq(transfers.fromAccountId, +accountId));
+
+  if (!transferResult) {
+    return next(new CustomError('transfer nod done yet', 400));
+  }
+
+  res.status(200).json({
+    status: 'success',
+    message: 'list of transfer records',
+    numResults: transferResult.length,
+    data: transferResult,
+  });
+});
 
 const getTransfer = catchAsynncFunc(async (req: Request, res: Response, next: NextFunction) => {
   const { id } = req.params;
@@ -30,22 +60,14 @@ const getTransfer = catchAsynncFunc(async (req: Request, res: Response, next: Ne
 const createTransfer = catchAsynncFunc(async (req: Request, res: Response, next: NextFunction) => {
   const { fromAccountId, toAccountId, amount, currency }: CreateTransferParams = req.body;
 
-  if (fromAccountId <= 0 || toAccountId <= 0 || !amount) {
-    return next(new CustomError('All fields are required', 400));
-  }
-
-  if (toAccountId === fromAccountId) {
-    return next(new CustomError('Can not transfer to own account', 400));
-  }
-
   const account = await db.select().from(accounts).where(eq(accounts.id, fromAccountId));
 
-  if (amount < 100 || account[0].balance < amount) {
-    return next(new CustomError('Insufficient balance', 400));
+  if (account[0].owner !== req.body.username) {
+    return next(new CustomError('not authorized', 401));
   }
 
-  if (!fromAccountId || !toAccountId) {
-    return next(new CustomError('Missing accounts', 400));
+  if (amount < 100 || account[0].balance < amount) {
+    return next(new CustomError('insufficient balance', 400));
   }
 
   if ((await validAccountCurrency(currency, toAccountId)) === false || (await validAccountCurrency(currency, fromAccountId)) === false) {
@@ -54,25 +76,26 @@ const createTransfer = catchAsynncFunc(async (req: Request, res: Response, next:
 
   const transfer = await transferTX({ amount: Number(amount), toAccountId, fromAccountId } as CreateTransferParams);
 
-  if (!transfer) return next(new CustomError('Internal server error', 500));
+  if (!transfer) return next(new CustomError('internal server error', 500));
 
   res.status(200).json({
     status: 'success',
-    message: 'Transaction done successfully',
+    message: 'transaction done successfully',
     transfers: transfer,
   });
 });
 
 const getAllTransfer = catchAsynncFunc(async (req: Request, res: Response, next: NextFunction) => {
+  // TODO: Only admin can access this api
   const result = await db.select().from(transfers).orderBy(transfers.createdAt);
 
   if (!result) {
-    return next(new CustomError('No transfer records', 200));
+    return next(new CustomError('no transfer records', 200));
   }
 
   res.status(200).json({
     status: 'success',
-    messag: 'Transfer records found',
+    messag: 'transfer records found',
     data: result,
   });
 });
@@ -89,4 +112,4 @@ const validAccountCurrency = async (currency: CreateTransferParams['currency'], 
   return true;
 };
 
-export default { getTransfer, createTransfer, getAllTransfer };
+export default { getTransfer, createTransfer, getAllTransfer, getOneAccountTransfers };
