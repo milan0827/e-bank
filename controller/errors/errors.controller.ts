@@ -11,7 +11,7 @@ export const globalErrorHandling = (err: CustomErrorType, req: Request, res: Res
     //23505 => Duplicate key value error code
     // 23503 => foreign key constraint // creating an account of user that does not exist on database
     return res.status(403).json({
-      status: 'error',
+      status: 'fail',
       message: err.message,
     });
   }

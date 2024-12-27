@@ -7,6 +7,7 @@ import { eq } from 'drizzle-orm';
 import { transferTX } from './transaction.contoller';
 import { CreateTransferParams } from '../../types/transfers';
 import accountsController from '../accounts/accounts.controller';
+import { validAccountCurrency } from '../../helpers/utis';
 
 // TODO: getOneUserTranser
 
@@ -60,17 +61,31 @@ const getTransfer = catchAsynncFunc(async (req: Request, res: Response, next: Ne
 const createTransfer = catchAsynncFunc(async (req: Request, res: Response, next: NextFunction) => {
   const { fromAccountId, toAccountId, amount, currency }: CreateTransferParams = req.body;
 
-  const account = await db.select().from(accounts).where(eq(accounts.id, fromAccountId));
+  if (fromAccountId === toAccountId) {
+    return next(new CustomError('can not transfer to your own account', 400));
+  }
 
-  if (account[0].owner !== req.body.username) {
+  const fromAccount = await db.select().from(accounts).where(eq(accounts.id, fromAccountId));
+
+  if (fromAccount.length === 0) {
+    return next(new CustomError('account not found', 400));
+  }
+
+  if (fromAccount[0].owner !== req.body.username) {
     return next(new CustomError('not authorized', 401));
   }
 
-  if (amount < 100 || account[0].balance < amount) {
+  if (amount < 100 || fromAccount[0].balance < amount) {
     return next(new CustomError('insufficient balance', 400));
   }
 
-  if ((await validAccountCurrency(currency, toAccountId)) === false || (await validAccountCurrency(currency, fromAccountId)) === false) {
+  const toAccount = await db.select().from(accounts).where(eq(accounts.id, toAccountId));
+
+  if (toAccount.length === 0) {
+    return next(new CustomError('account not found', 400));
+  }
+
+  if (validAccountCurrency(currency, toAccount[0].currency) === false || validAccountCurrency(currency, fromAccount[0].currency) === false) {
     return next(new CustomError('account currency mismatch', 400));
   }
 
@@ -99,17 +114,5 @@ const getAllTransfer = catchAsynncFunc(async (req: Request, res: Response, next:
     data: result,
   });
 });
-
-const validAccountCurrency = async (currency: CreateTransferParams['currency'], accountId: number): Promise<boolean> => {
-  const account = await db.select().from(accounts).where(eq(accounts.id, accountId));
-  if (!account || account[0].id <= 0) {
-    return false;
-  }
-
-  if (currency !== account[0].currency) {
-    return false;
-  }
-  return true;
-};
 
 export default { getTransfer, createTransfer, getAllTransfer, getOneAccountTransfers };

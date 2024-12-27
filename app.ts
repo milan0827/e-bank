@@ -8,6 +8,7 @@ import { CustomErrorType } from './types/customErrorType';
 import usersRouter from './routes/users.routes';
 import bcrypt from 'bcrypt';
 import { trimmer } from './middleware/trimmer';
+import authRouter from './routes/auth.routes';
 
 const app = express();
 app.use(express.json());
@@ -25,6 +26,7 @@ dotenv.config();
 
 app.use(trimmer);
 
+app.use('/api/v1/auth', authRouter);
 app.use('/api/v1/accounts', accountRouter);
 app.use('/api/v1/entries', entriesRouter);
 app.use('/api/v1/transfers', transferRouter);
