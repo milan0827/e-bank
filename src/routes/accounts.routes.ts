@@ -1,7 +1,7 @@
 import express from 'express';
 import accountController from '../controller/accounts/accounts.controller';
-import authMiddleware from '../middleware/auth';
-import { validateData } from '../middleware/validateData';
+import authMiddleware from '../middleware/authModdleware';
+import { validateData } from '../middleware/validateDataMiddleware.ts';
 import { CreateAccountSchema } from '../controller/accounts/schema/accounts.schema';
 
 const router = express.Router();
