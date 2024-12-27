@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "typeRoots": ["./types", "./node_modules/@types"],
+    "typeRoots": ["src/types", "./node_modules/@types"],
     "target": "es6",
     "module": "commonjs",
     "moduleResolution": "node",
@@ -12,5 +12,5 @@
     "skipLibCheck": true,
     "types": ["node", "jest"]
   },
-  "include": ["types/**/*.d.ts", "./**/*.ts"]
+  "include": ["src/types/**/*.d.ts", "./**/*.ts"]
 }
