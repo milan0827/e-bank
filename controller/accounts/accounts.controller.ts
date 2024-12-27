@@ -49,7 +49,7 @@ const getAllAccounts = catchAsynncFunc(async (req: Request, res: Response, next:
 });
 
 const createAccount = catchAsynncFunc(async (req: Request, res: Response, next: NextFunction) => {
-  const { owner, balance, currency }: AccountType = req.body;
+  const { owner, balance, currency } = req.body;
 
   if (!owner || typeof owner !== 'string' || owner.trim().length === 0) {
     return res.status(400).json({
@@ -57,16 +57,15 @@ const createAccount = catchAsynncFunc(async (req: Request, res: Response, next: 
       message: 'provide a valid owner name',
     });
   }
+  if (owner !== req.body.username) {
+    return next(new CustomError('not authorized', 401));
+  }
 
   if (!Object.values(currencyEnum).includes(currency as currencyEnum)) {
     return res.status(400).json({
       status: 'fail',
       message: 'not allowed, accounts with two currency',
     });
-  }
-
-  if (owner !== req.body.username) {
-    return next(new CustomError('not authorized', 401));
   }
 
   const account = await db

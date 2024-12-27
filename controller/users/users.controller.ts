@@ -8,33 +8,6 @@ import { hashedPassword } from '../auth/password';
 
 // NOTE: Only the bank admin can perform thsese action
 
-const createUser = catchAsynncFunc(async (req: Request, res: Response, next: NextFunction) => {
-  const { username, fullName, password, email } = req.body;
-
-  if (!username || !fullName || !password || !email) return next(new CustomError('all fields are required', 404));
-
-  if (username !== username.toLowerCase()) {
-    return next(new CustomError('username must be in lowercase', 400));
-  }
-
-  const hashPassword = await hashedPassword(password);
-
-  const user = await db
-    .insert(users)
-    .values({
-      email,
-      fullName,
-      password: hashPassword,
-      username,
-    })
-    .returning();
-
-  res.status(200).json({
-    status: 'success',
-    user: user[0],
-  });
-});
-
 const getAllUser = catchAsynncFunc(async (req: Request, res: Response, next: NextFunction) => {
   const allUser = await db.select().from(users).limit(10);
 
@@ -94,4 +67,4 @@ const deleteUser = catchAsynncFunc(async (req: Request, res: Response, next: Nex
   });
 });
 
-export default { createUser, getAllUser, getUser, updateUser, deleteUser };
+export default { getAllUser, getUser, updateUser, deleteUser };

@@ -1,5 +1,11 @@
 export interface CreateAccountArgs {
   fullName: string;
   balance: number;
-  currency: 'NRS' | 'EURO' | 'USD';
+  currency: CurrencyType;
+}
+
+export interface CurrencyType {
+  NRS: 'NRS';
+  EURO: 'EURO';
+  USD: 'USD';
 }
