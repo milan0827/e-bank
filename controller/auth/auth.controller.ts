@@ -7,6 +7,7 @@ import { hashedPassword, verifyPassword } from './password';
 import { createToken } from '../../token/jwt_token';
 import { catchAsynncFunc } from '../../helpers/catchAysynFunc';
 import bcrypt from 'bcrypt';
+import { ERRORS } from '../../constants';
 
 interface User {
   username: string;
@@ -48,16 +49,16 @@ const login = catchAsynncFunc(async (req: Request, res: Response, next: NextFunc
   const { username, password } = req.body;
 
   const user = await db.select().from(users).where(eq(users.username, username)).limit(1);
-  if (!user.length) return next(new CustomError('invalid credentials', 400));
+  if (!user.length) return next(new CustomError(ERRORS.AUTH.INVALID_CREDENTIALS, 400));
 
   const isMatch = await bcrypt.compare(password, user[0].password);
   if (!isMatch) {
-    return next(new CustomError('invalid credentials', 400));
+    return next(new CustomError(ERRORS.AUTH.INVALID_CREDENTIALS, 400));
   }
 
   const token = createToken(user[0].username);
   if (!token) {
-    return next(new CustomError('token generation failed', 500));
+    return next(new CustomError(ERRORS.AUTH.TOKEN_GENERATION_FAILED, 500));
   }
 
   const UserResponse: UserResponse = {
