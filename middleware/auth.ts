@@ -9,18 +9,12 @@ export default function authMiddleware(req: Request, res: Response, next: NextFu
   if (!bearerToken) return next(new CustomError('authorization header is not provided', 401));
 
   if (bearerToken[0].toLocaleLowerCase() !== 'bearer') {
-    console.log('token', bearerToken[0]);
     return next(new CustomError('invalid token format', 401));
   }
   const token = bearerToken[1];
 
   const decodedToken = jwt.verify(token, process.env.JWT_SECRET_KEY!) as { username: string };
   req.body.username = decodedToken.username;
-
-  console.log('accounts', accounts.owner);
-  // if (accounts.owner !== req.body.username) {
-  //   return next(new CustomError('not authorized', 401));
-  // }
 
   next();
 }
