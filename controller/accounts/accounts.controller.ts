@@ -1,11 +1,10 @@
+import { eq } from 'drizzle-orm';
 import { NextFunction, Request, Response } from 'express';
 import { db } from '../../db/drizzle';
-import { accounts, AccountType, users } from '../../db/schema';
-import { eq } from 'drizzle-orm';
+import { accounts } from '../../db/schema';
 import { catchAsynncFunc } from '../../helpers/catchAysynFunc';
 import CustomError from '../../helpers/customError';
-
-const ACCOUNT_NOT_FOUND_ERROR = 'account not found';
+import { ERRORS } from '../../constants';
 
 enum currencyEnum {
   NRS = 'NRS',
@@ -19,11 +18,11 @@ const getAccount = catchAsynncFunc(async (req: Request, res: Response, next: Nex
   const accountExists = await db.select().from(accounts).where(eq(accounts.id, +id)).limit(1);
 
   if (accountExists[0].owner !== req.body.username) {
-    return next(new CustomError('account not found', 401));
+    return next(new CustomError(ERRORS.ACCOUNT.ACCOUNT_NOT_FOUND, 401));
   }
 
   if (!accountExists || accountExists.length === 0) {
-    return next(new CustomError('account not found', 400));
+    return next(new CustomError(ERRORS.ACCOUNT.ACCOUNT_NOT_FOUND, 400));
   }
 
   res.status(200).json({
@@ -38,7 +37,7 @@ const getAllAccounts = catchAsynncFunc(async (req: Request, res: Response, next:
   const allAccounts = await db.select().from(accounts).where(eq(accounts.owner, req.body.username)).limit(5).orderBy(accounts.id);
 
   if (!allAccounts || allAccounts.length === 0) {
-    return next(new CustomError('accounts not found', 200));
+    return next(new CustomError(ERRORS.ACCOUNT.ACCOUNT_NOT_FOUND, 200));
   }
 
   res.status(200).json({
@@ -58,13 +57,13 @@ const createAccount = catchAsynncFunc(async (req: Request, res: Response, next: 
     });
   }
   if (owner !== req.body.username) {
-    return next(new CustomError('not authorized', 401));
+    return next(new CustomError(ERRORS.AUTH.NOT_AUTHORIZED, 401));
   }
 
   if (!Object.values(currencyEnum).includes(currency as currencyEnum)) {
     return res.status(400).json({
       status: 'fail',
-      message: 'not allowed, accounts with two currency',
+      message: ERRORS.ACCOUNT.CURRENCY_MISMATCH,
     });
   }
 
@@ -88,11 +87,11 @@ const updateBalance = catchAsynncFunc(async (req: Request, res: Response, next: 
   const accountExists = await db.select().from(accounts).where(eq(accounts.id, +id)).limit(1);
 
   if (accountExists[0].owner !== req.body.username) {
-    return next(new CustomError('not authorized', 401));
+    return next(new CustomError(ERRORS.AUTH.NOT_AUTHORIZED, 401));
   }
 
   if (accountExists.length === 0) {
-    return next(new CustomError('account not found', 400));
+    return next(new CustomError(ERRORS.ACCOUNT.ACCOUNT_NOT_FOUND, 400));
   }
 
   if (!req.body.balance) {

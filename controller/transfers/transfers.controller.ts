@@ -8,6 +8,7 @@ import { transferTX } from './transaction.contoller';
 import { CreateTransferParams } from '../../types/transfers';
 import accountsController from '../accounts/accounts.controller';
 import { validAccountCurrency } from '../../helpers/utis';
+import { ERRORS } from '../../constants';
 
 // TODO: getOneUserTranser
 
@@ -62,36 +63,36 @@ const createTransfer = catchAsynncFunc(async (req: Request, res: Response, next:
   const { fromAccountId, toAccountId, amount, currency }: CreateTransferParams = req.body;
 
   if (fromAccountId === toAccountId) {
-    return next(new CustomError('can not transfer to your own account', 400));
+    return next(new CustomError(ERRORS.ACCOUNT.OWN_ACCOUNT_TRANSFER, 400));
   }
 
   const fromAccount = await db.select().from(accounts).where(eq(accounts.id, fromAccountId));
 
   if (fromAccount.length === 0) {
-    return next(new CustomError('account not found', 400));
+    return next(new CustomError(ERRORS.ACCOUNT.ACCOUNT_NOT_FOUND, 400));
   }
 
   if (fromAccount[0].owner !== req.body.username) {
-    return next(new CustomError('not authorized', 401));
+    return next(new CustomError(ERRORS.AUTH.NOT_AUTHORIZED, 401));
   }
 
   if (amount < 100 || fromAccount[0].balance < amount) {
-    return next(new CustomError('insufficient balance', 400));
+    return next(new CustomError(ERRORS.ACCOUNT.INSUFFICIENT_BALANCE, 400));
   }
 
   const toAccount = await db.select().from(accounts).where(eq(accounts.id, toAccountId));
 
   if (toAccount.length === 0) {
-    return next(new CustomError('account not found', 400));
+    return next(new CustomError(ERRORS.ACCOUNT.ACCOUNT_NOT_FOUND, 400));
   }
 
   if (validAccountCurrency(currency, toAccount[0].currency) === false || validAccountCurrency(currency, fromAccount[0].currency) === false) {
-    return next(new CustomError('account currency mismatch', 400));
+    return next(new CustomError(ERRORS.ACCOUNT.CURRENCY_MISMATCH, 400));
   }
 
   const transfer = await transferTX({ amount: Number(amount), toAccountId, fromAccountId } as CreateTransferParams);
 
-  if (!transfer) return next(new CustomError('internal server error', 500));
+  if (!transfer) return next(new CustomError(ERRORS.GENERAL.INTERNAL_SERVER_ERROR, 500));
 
   res.status(200).json({
     status: 'success',
