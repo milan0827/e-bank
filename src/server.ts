@@ -1,7 +1,8 @@
 import app from './app';
+import Logger from './lib/logger';
 
 const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {
-  console.log('listening on port 3000...');
+  Logger.info('listening on port 3000...');
 });

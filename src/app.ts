@@ -1,19 +1,20 @@
 import dotenv from 'dotenv';
 import express, { NextFunction, Request, Response } from 'express';
 import { globalErrorHandling } from './controller/errors/errors.controller';
+import { trimmer } from './middleware/trimmerMiddleware';
 import accountRouter from './routes/accounts.routes';
+import authRouter from './routes/auth.routes';
 import entriesRouter from './routes/entries.routes';
 import transferRouter from './routes/transfers.routes';
-import { CustomErrorType } from './types/customErrorType';
 import usersRouter from './routes/users.routes';
-import bcrypt from 'bcrypt';
-import { trimmer } from './middleware/trimmer';
-import authRouter from './routes/auth.routes';
+import { CustomErrorType } from './types/customErrorType';
+import morganMiddleware from './middleware/morganMiddleware';
 
 const app = express();
 app.use(express.json());
 dotenv.config();
 
+app.use(morganMiddleware);
 // app.use((req: Request, res: Response, next: NextFunction) => {
 //   req.requestTime = new Date().toISOString();
 // });
