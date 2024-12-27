@@ -1,8 +1,9 @@
 import { Request, Response } from 'express';
 import { CustomErrorType } from '../../types/customErrorType';
+import Logger from '../../lib/logger';
 
 export const globalErrorHandling = (err: CustomErrorType, req: Request, res: Response) => {
-  console.log('error error error error', err);
+  Logger.error('error error error error', err);
 
   err.status = err.status || 'error';
   err.statusCode = err.statusCode || 500;
