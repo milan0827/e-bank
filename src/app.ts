@@ -14,17 +14,9 @@ const app = express();
 app.use(express.json());
 dotenv.config();
 
+console.log('Process', process.env.NODE_ENV);
+
 app.use(morganMiddleware);
-// app.use((req: Request, res: Response, next: NextFunction) => {
-//   req.requestTime = new Date().toISOString();
-// });
-
-// app.get('/', (req: Request, res: Response) => {
-//   return res.send({
-//     data: 'hello world',
-//   });
-// });
-
 app.use(trimmer);
 
 app.use('/api/v1/auth', authRouter);

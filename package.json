@@ -4,6 +4,7 @@
   "main": "index.js",
   "scripts": {
     "dev": "ts-node-dev ./src/server.ts",
+    "prod": "NODE_ENV=production ts-node-dev ./src/server.ts",
     "start": "node dist/server.js",
     "build": "tsc",
     "test": "jest --verbose --coverage",

@@ -1,13 +1,13 @@
-import { NextFunction, Response, Request } from 'express';
-import CustomError from '../../helpers/customError';
-import { db } from '../../db/drizzle';
-import { users, UserType } from '../../db/schema';
-import { eq } from 'drizzle-orm';
-import { hashedPassword, verifyPassword } from './password';
-import { createToken } from '../../token/jwt_token';
-import { catchAsynncFunc } from '../../helpers/catchAysynFunc';
 import bcrypt from 'bcrypt';
+import { eq } from 'drizzle-orm';
+import { NextFunction, Request, Response } from 'express';
 import { ERRORS } from '../../constants';
+import { db } from '../../db/drizzle';
+import { users } from '../../db/schema';
+import { catchAsynncFunc } from '../../helpers/catchAysynFunc';
+import CustomError from '../../helpers/customError';
+import { hashedPassword } from './password';
+import { createToken } from '../../token/jwt_token';
 
 interface User {
   username: string;

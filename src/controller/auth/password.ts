@@ -1,5 +1,4 @@
 import bcrypt from 'bcrypt';
-import Logger from '../../lib/logger';
 
 export const hashedPassword = async (password: string): Promise<string> => {
   const salt = await bcrypt.genSalt();
@@ -11,8 +10,8 @@ export const hashedPassword = async (password: string): Promise<string> => {
 export const verifyPassword = (passwordHashed: string, plainPassword: string) => {
   bcrypt.compare(plainPassword, passwordHashed, (err, isMatch) => {
     if (err) {
-      Logger.error(err);
+      console.error(err);
       return err;
-    } else Logger.info('ismatch.......', isMatch);
+    } else console.info('ismatch.......', isMatch);
   });
 };
