@@ -1,8 +1,8 @@
 import request from 'supertest';
-import app from '../../../app';
 import accountsController from './accounts.controller';
 import { NextFunction, Request, Response } from 'express';
 import { db } from '../../db/drizzle';
+import app from '../../app';
 
 describe('POST /api/v1/accounts ', () => {
   it('Should return the list of account', async () => {

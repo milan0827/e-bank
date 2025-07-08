@@ -11,7 +11,7 @@ export function createToken(username: string): string {
   }
 
   return jwt.sign({ username }, process.env.JWT_SECRET_KEY!, {
-    expiresIn: '1h',
+    expiresIn: '5m',
   });
 }
 
@@ -22,7 +22,7 @@ export function verifyToken(req: Request, res: Response, next: NextFunction) {
   try {
     const token = bearerToken?.split(' ')[1];
     const decoded = jwt.verify(token as string, process.env.JWT_SECRET_KEY!) as { username: string };
-    req.body.username = decoded.username;
+    req.user.username = decoded.username;
     next();
   } catch (error) {
     return next(new CustomError('invalid token', 401));

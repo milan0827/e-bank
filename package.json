@@ -3,7 +3,8 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "dev": "ts-node-dev server.ts",
+    "dev": "ts-node-dev ./src/server.ts",
+    "prod": "NODE_ENV=production ts-node-dev ./src/server.ts",
     "start": "node dist/server.js",
     "build": "tsc",
     "test": "jest --verbose --coverage",
@@ -23,9 +24,11 @@
     "drizzle-orm": "^0.36.1",
     "express": "^4.21.1",
     "jsonwebtoken": "^9.0.2",
+    "morgan": "^1.10.0",
     "pg": "^8.13.1",
     "supertest": "^7.0.0",
     "ts-jest": "^29.2.5",
+    "winston": "^3.17.0",
     "zod": "^3.24.1"
   },
   "devDependencies": {
@@ -34,6 +37,7 @@
     "@types/jest": "^29.5.14",
     "@types/jsonwebtoken": "^9.0.7",
     "@types/mocha": "^10.0.10",
+    "@types/morgan": "^1.9.9",
     "@types/pg": "^8.11.10",
     "@types/supertest": "^6.0.2",
     "@typescript-eslint/eslint-plugin": "^8.14.0",

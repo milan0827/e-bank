@@ -72,7 +72,7 @@ const createTransfer = catchAsynncFunc(async (req: Request, res: Response, next:
     return next(new CustomError(ERRORS.ACCOUNT.ACCOUNT_NOT_FOUND, 400));
   }
 
-  if (fromAccount[0].owner !== req.body.username) {
+  if (fromAccount[0].owner !== req.user.username) {
     return next(new CustomError(ERRORS.AUTH.NOT_AUTHORIZED, 401));
   }
 

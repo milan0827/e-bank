@@ -1,8 +1,8 @@
 import express from 'express';
 import transferController from '../controller/transfers/transfers.controller';
-import authMiddleware from '../middleware/auth';
-import { validateData } from '../middleware/validateData';
+import { validateData } from '../middleware/validateDataMiddleware.ts';
 import { CreateTransferSchema } from '../controller/transfers/schema/transfers.schema';
+import { authMiddleware } from '../middleware/authMiddleware';
 
 const router = express.Router();
 

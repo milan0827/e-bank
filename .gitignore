@@ -1,4 +1,7 @@
-./build
+dist/
 node_modules
-./.github/workflows/.secrets
+.secrets
 coverage
+.env
+
+logs/

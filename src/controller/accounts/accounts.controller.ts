@@ -1,7 +1,7 @@
 import { eq } from 'drizzle-orm';
 import { NextFunction, Request, Response } from 'express';
 import { db } from '../../db/drizzle';
-import { accounts } from '../../db/schema';
+import { accounts, users } from '../../db/schema';
 import { catchAsynncFunc } from '../../helpers/catchAysynFunc';
 import CustomError from '../../helpers/customError';
 import { ERRORS } from '../../constants';
@@ -17,7 +17,7 @@ const getAccount = catchAsynncFunc(async (req: Request, res: Response, next: Nex
 
   const accountExists = await db.select().from(accounts).where(eq(accounts.id, +id)).limit(1);
 
-  if (accountExists[0].owner !== req.body.username) {
+  if (accountExists[0].owner !== req.user.username) {
     return next(new CustomError(ERRORS.ACCOUNT.ACCOUNT_NOT_FOUND, 401));
   }
 
@@ -34,7 +34,7 @@ const getAccount = catchAsynncFunc(async (req: Request, res: Response, next: Nex
 
 const getAllAccounts = catchAsynncFunc(async (req: Request, res: Response, next: NextFunction) => {
   //TODO: Only andmin can get all accounts
-  const allAccounts = await db.select().from(accounts).where(eq(accounts.owner, req.body.username)).limit(5).orderBy(accounts.id);
+  const allAccounts = await db.select().from(accounts).where(eq(accounts.owner, req.user.username)).limit(5).orderBy(accounts.id);
 
   if (!allAccounts || allAccounts.length === 0) {
     return next(new CustomError(ERRORS.ACCOUNT.ACCOUNT_NOT_FOUND, 200));
@@ -55,9 +55,6 @@ const createAccount = catchAsynncFunc(async (req: Request, res: Response, next: 
       status: 'fail',
       message: 'provide a valid owner name',
     });
-  }
-  if (owner !== req.body.username) {
-    return next(new CustomError(ERRORS.AUTH.NOT_AUTHORIZED, 401));
   }
 
   if (!Object.values(currencyEnum).includes(currency as currencyEnum)) {
@@ -86,12 +83,21 @@ const updateBalance = catchAsynncFunc(async (req: Request, res: Response, next: 
   const { id } = req.params;
   const accountExists = await db.select().from(accounts).where(eq(accounts.id, +id)).limit(1);
 
-  if (accountExists[0].owner !== req.body.username) {
-    return next(new CustomError(ERRORS.AUTH.NOT_AUTHORIZED, 401));
-  }
+  // const freshUser = await db.select().from(users).where(eq(users.username, accountExists[0].owner));
+  // if (freshUser.length === 0) return next(new CustomError('user does not exist', 401));
+  // console.log('Fresh Users', freshUser);
+
+  // console.log('Account', accountExists);
+  // console.log('Account', req.user);
 
   if (accountExists.length === 0) {
     return next(new CustomError(ERRORS.ACCOUNT.ACCOUNT_NOT_FOUND, 400));
+  }
+
+  console.log(accountExists);
+
+  if (accountExists[0].owner !== req.user?.username) {
+    return next(new CustomError(ERRORS.AUTH.NOT_AUTHORIZED, 401));
   }
 
   if (!req.body.balance) {
