@@ -3,7 +3,7 @@ import { eq } from 'drizzle-orm';
 import { NextFunction, Request, Response } from 'express';
 import { ERRORS } from '../../constants';
 import { db } from '../../db/drizzle';
-import { users } from '../../db/schema';
+import { accounts, users } from '../../db/schema';
 import { catchAsynncFunc } from '../../helpers/catchAysynFunc';
 import CustomError from '../../helpers/customError';
 import { hashedPassword } from './password';
@@ -76,4 +76,28 @@ const login = catchAsynncFunc(async (req: Request, res: Response, next: NextFunc
   });
 });
 
-export default { registerUser, login };
+const changePassword = catchAsynncFunc(async (req: Request, res: Response, next: NextFunction) => {
+  const { currPassword, newPassword } = req.body;
+
+  const username = req.user?.username;
+  const user = await db
+    .select({
+      password: users.password,
+    })
+    .from(users)
+    .where(eq(users.username, username));
+  if (!user) return next(new CustomError(ERRORS.USER.USER_NOT_FOUND, 400));
+  const isPasswordMatched = await bcrypt.compare(currPassword, user[0].password);
+  if (!isPasswordMatched) return next(new CustomError('current password is incorrect', 400));
+
+  console.log('HashedPassword', isPasswordMatched);
+  const hashPassword = await hashedPassword(newPassword);
+  await db.update(users).set({ password: hashPassword });
+
+  res.status(200).json({
+    status: 'success',
+    message: 'password changed successfully',
+  });
+});
+
+export default { registerUser, login, changePassword };
